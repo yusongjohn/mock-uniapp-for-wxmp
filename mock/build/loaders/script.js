@@ -1,5 +1,5 @@
 const {updateUsingComponents} = require("../appInfo/json");
-module.exports = function () {
+module.exports = function (content) {
     this.cacheable && this.cacheable()
 
     // this.resourcePath
@@ -10,4 +10,5 @@ module.exports = function () {
     updateUsingComponents(globalComponents, appJsonFile); // 更新到 app.json
 
     // 可能需要确认引用的组件是否存在啊，读取对应路径就知道了
+    return content;
 }

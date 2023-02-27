@@ -9,13 +9,21 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "webpack": "4.46.0",
+    "@dcloudio/uni-mp-weixin": "2.0.1-32920211122003",
+    "@dcloudio/uni-template-compiler": "2.0.1-32920211122003",
+    "loader-utils": "1.4.2",
+    "@babel/core": "^7.0.0",
+    "babel-loader": "8.2.2",
+    "@vue/babel-preset-app": "^5.0.8",
+    "babel-plugin-import": "^1.13.6",
+    "copy-webpack-plugin": "5.1.2",
+    "fs-extra": "^11.1.0",
+    "mini-css-extract-plugin": "^0.9.0",
     "vue-loader": "15.8.3",
     "vue-template-compiler": "2.6.11",
-    "copy-webpack-plugin": "5.1.2",
-    "wrap-loader": "^0.2.0"
+    "webpack": "4.46.0",
+    "wrap-loader": "0.2.0"
   },
   "dependencies": {
-    "fs-extra": "^11.1.0"
   }
 }

@@ -5,16 +5,16 @@ const {getAllPages} = require("./utils");
 const webpack = require('webpack')
 
 function build(context) {
-    const config = require('./webpack.config');
-
+    const config = require('./webpack.config')(context);
     webpack(config, function (err, result) {
+
         if (err) {
             return console.error(err)
         }
-        console.log(result);
+        // console.log(result);
     })
 }
 
-build('/Users/songyu/songyu/mock-uniapp/demo')
+build('/Users/songyu/songyu/mock-uniapp-for-wxmp/demo')
 
 module.exports = build

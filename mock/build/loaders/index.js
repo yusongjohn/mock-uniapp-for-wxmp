@@ -1,9 +1,9 @@
 const path = require('path')
 
-function getMpRules(projectDir) {
+function getMpRules(context) {
     return [
         {
-            test: `${projectDir}/main.js`,
+            test: `${context}/main.js`,
             use: [
                 {
                     loader: "wrap-loader",
@@ -27,32 +27,68 @@ function getMpRules(projectDir) {
                 }
             ]
         },
+        // {
+        //     resourceQuery: /vue&type=template/,
+        //     use: [
+        //         {
+        //             loader: path.resolve(__dirname, 'template.js')
+        //         }
+        //     ]
+        // },
+        // {
+        //     resourceQuery: [
+        //         /lang=wxs/,
+        //         /lang=filter/,
+        //         /lang=sjs/,
+        //         /blockType=wxs/,
+        //         /blockType=filter/,
+        //         /blockType=sjs/
+        //     ],
+        //     use: [
+        //         {
+        //             loader: "@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-filter-loader/index.js"
+        //         }
+        //     ]
+        // }
+    ]
+}
+
+
+const getCommonRules = function (context) {
+    return [
         {
-            resourceQuery: /vue&type=template/,
+            test: /\.m?jsx?$/,
             use: [
                 {
-                    loader: path.resolve(__dirname, 'template.js')
+                    loader: "babel-loader",
+                    // options:
                 }
-            ]
-        },
-        // TODO
-        // cacheDirectory: "/Users/songyu/tencent/doctor-uni/node_modules/.cache/uni-template-compiler/mp-weixin",
-        // cacheIdentifier: "0af8e322",
-        // require('f/lib/cache-loader').createTemplateCacheLoader(),
-        {
-            resourceQuery: [
-                /lang=wxs/,
-                /lang=filter/,
-                /lang=sjs/,
-                /blockType=wxs/,
-                /blockType=filter/,
-                /blockType=sjs/
             ],
-            use: [
-                {
-                    loader: "@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-filter-loader/index.js"
-                }
-            ]
+            exclude: /(node_modules)/,
         }
     ]
+}
+
+const compiler = require('@dcloudio/uni-template-compiler')
+const vueOptions = {
+    cacheDirectory: false,
+    cacheIdentifier: false,
+    compiler
+}
+
+const vueLoaderRules = [
+    {
+        test: /\.vue$/,
+        use: [
+            {
+                loader: 'vue-loader',
+                options: vueOptions
+            }
+        ]
+
+    }
+]
+
+module.exports = function (context) {
+    return [...vueLoaderRules, ...getCommonRules(context), ...getMpRules(context)]
 }

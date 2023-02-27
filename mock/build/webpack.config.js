@@ -1,8 +1,10 @@
 const {appJsonFile} = require("./constant");
 const fsExtra = require("fs-extra");
+const loaderUtils = require('loader-utils')
 const {getAllPages} = require("./utils");
+const path = require('path')
 
-function getEntry() {
+function getEntry(context) {
     const mainJsPath = `${context}/main.js`
     const entry = {
         "common/main": mainJsPath
@@ -16,9 +18,25 @@ function getEntry() {
     allPages.forEach(page => {
         entry[page] = `${mainJsPath}?page=${page}`
     })
-    return entry;
+    return function () {
+        return entry
+    };
 }
 
-module.exports = {
-    entry: getEntry()
+module.exports = function (context) {
+    return {
+        entry: getEntry(context),
+        output: {
+            chunkFilename: "[id].js",
+            filename: "[name].js",
+            globalObject: "global",
+            path: path.resolve(context, 'dist'),
+            publicPath: "/"
+        },
+        module: {
+            noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
+            rules: require('./loaders/index')(context)
+        },
+        plugins: require('./plugins/index')(context)
+    }
 }

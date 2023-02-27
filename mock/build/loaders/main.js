@@ -1,12 +1,14 @@
+const loaderUtils = require('loader-utils')
+
 const {updateUsingComponents} = require('../appInfo/json')
 const appJsonFile = require('../constant')
 // 处理 pageA.vue
 module.exports = function (content) {
     this.cacheable && this.cacheable()
 
-    if (this.resourceQuery) { // 处理 main.js?page=pageA.vue
-        const path = ''
-        const pagePath = `${path}.vue`
+    if (this.resourceQuery) { // 处理 main.js?page=pageA
+        const params = loaderUtils.parseQuery(this.resourceQuery)
+        const pagePath = `${params.page}.vue`
         const middleCode = `import Vue from 'vue';import Page from './${pagePath}';createPage(Page);`
         return this.callback(null, middleCode)
     } else { // 处理 main.js
@@ -18,6 +20,10 @@ module.exports = function (content) {
 
         // addCreateApp
 
-        // dynamic import global component to force the component be compiled
+        // dynamic import global component to force the component to be compiled
+
+
+        return this.callback(null, content)
     }
+
 }
