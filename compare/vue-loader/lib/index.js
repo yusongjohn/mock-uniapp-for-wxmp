@@ -13,7 +13,7 @@ const componentNormalizerPath = require.resolve('./runtime/componentNormalizer')
 const { NS } = require('./plugin')
 
 let errorEmitted = false
-
+let modules // h5 平台摇树优化时,需要保留编译器原始modules(因为框架内代码不需要modules,开发者代码需要)
 function loadTemplateCompiler (loaderContext) {
   try {
     return require('vue-template-compiler')
@@ -69,8 +69,33 @@ module.exports = function (source) {
     compiler: options.compiler || loadTemplateCompiler(loaderContext),
     filename,
     sourceRoot,
-    needMap: sourceMap
+    needMap: sourceMap,
+    isAppService: options.isAppService,
+    isAppView: options.isAppView,
+    isAppNVue: options.isAppNVue
   })
+
+  if (options.isH5TreeShaking) { // 摇树优化逻辑(框架组件移除样式,禁用 modules)
+    const isWin = /^win/.test(process.platform)
+    const normalizePath = path => (isWin ? path.replace(/\\/g, '/') : path)
+
+    if(!options.compilerOptions){
+      options.compilerOptions = {}
+    }
+    options.compilerOptions.autoComponentResourcePath = normalizePath(resourcePath)
+
+    // fixed by xxxxxx
+    if(!modules && options.compilerOptions && options.compilerOptions.modules){
+        modules = options.compilerOptions.modules
+    }
+    const sourcePath = normalizePath(require('@dcloudio/uni-h5/path').src)
+    if (normalizePath(this.resourcePath).indexOf(sourcePath) === 0) {
+      descriptor.styles.length = 0
+      options.compilerOptions && (delete options.compilerOptions.modules)
+    } else if(options.compilerOptions){
+      options.compilerOptions.modules = modules
+    }
+  }
 
   // if the query has a type field, this is a language block request
   // e.g. foo.vue?type=template&id=xxxxx
@@ -85,8 +110,8 @@ module.exports = function (source) {
   }
 
   // module id for scoped CSS & hot-reload
-  const rawShortFilePath = path
-    .relative(context, resourcePath)
+  const rawShortFilePath = path // fixed by xxxxxx
+    .relative(process.env.UNI_INPUT_DIR || context, resourcePath)
     .replace(/^(\.\.[\/\\])+/, '')
 
   const shortFilePath = rawShortFilePath.replace(/\\/g, '/') + resourceQuery
@@ -108,16 +133,21 @@ module.exports = function (source) {
   )
 
   // template
-  let templateImport = `var render, staticRenderFns`
+  // fixed by xxxxxx (recyclable,auto components)
+  let recyclable
+  let templateImport = `var render, staticRenderFns, recyclableRender, components`
   let templateRequest
   if (descriptor.template) {
+    // fixed by xxxxxx
+    recyclable = options.isAppNVue && !!(descriptor.template.attrs && descriptor.template.attrs.recyclable)
     const src = descriptor.template.src || resourcePath
     const idQuery = `&id=${id}`
     const scopedQuery = hasScoped ? `&scoped=true` : ``
     const attrsQuery = attrsToQuery(descriptor.template.attrs)
     const query = `?vue&type=template${idQuery}${scopedQuery}${attrsQuery}${inheritQuery}`
     const request = templateRequest = stringifyRequest(src + query)
-    templateImport = `import { render, staticRenderFns } from ${request}`
+    // fixed by xxxxxx (auto components)
+    templateImport = `import { render, staticRenderFns, recyclableRender, components } from ${request}`
   }
 
   // script
@@ -133,9 +163,24 @@ module.exports = function (source) {
     )
   }
 
+  let renderjsImport = `var renderjs`
+  if((options.isAppView || options.isH5) && descriptor.renderjs){
+    const src = descriptor.renderjs.src || resourcePath
+    const attrsQuery = attrsToQuery(descriptor.renderjs.attrs, 'js')
+    const query = `?vue&type=renderjs${attrsQuery}${inheritQuery}`
+    const request = stringifyRequest(src + query)
+    renderjsImport = (
+      `import renderjs from ${request}\n` +
+      `renderjs.__module = '${descriptor.renderjs.attrs.module}'\n` +
+      `export * from ${request}` // support named exports
+    )
+  }
+
+
   // styles
   let stylesCode = ``
-  if (descriptor.styles.length) {
+  // fixed by xxxxxx 仅限 view 层
+  if (!options.isAppService && descriptor.styles.length) {
     stylesCode = genStylesCode(
       loaderContext,
       descriptor.styles,
@@ -146,9 +191,10 @@ module.exports = function (source) {
       isServer || isShadow // needs explicit injection?
     )
   }
-
+  // fixed by xxxxxx (injectStyles,auto components)
   let code = `
 ${templateImport}
+${renderjsImport}
 ${scriptImport}
 ${stylesCode}
 
@@ -159,10 +205,12 @@ var component = normalizer(
   render,
   staticRenderFns,
   ${hasFunctional ? `true` : `false`},
-  ${/injectStyles/.test(stylesCode) ? `injectStyles` : `null`},
+  ${options.isAppNVue ? `null`: (/injectStyles/.test(stylesCode) ? `injectStyles` : `null`)},
   ${hasScoped ? JSON.stringify(id) : `null`},
-  ${isServer ? JSON.stringify(hash(request)) : `null`}
-  ${isShadow ? `,true` : ``}
+  ${isServer ? JSON.stringify(hash(request)) : `null`},
+  ${isShadow ? `true` : `false`},
+  components,
+  renderjs
 )
   `.trim() + `\n`
 
@@ -178,7 +226,10 @@ var component = normalizer(
   if (needsHotReload) {
     code += `\n` + genHotReloadCode(id, hasFunctional, templateRequest)
   }
-
+  // fixed by xxxxxx (app-nvue injectStyles)
+  if (options.isAppNVue && /injectStyles/.test(stylesCode)) {
+    code +=`\ninjectStyles.call(component)`
+  }
   // Expose filename. This is used by the devtools and Vue runtime warnings.
   if (!isProduction) {
     // Expose the file's full path in development, so that it can be opened
@@ -189,7 +240,9 @@ var component = normalizer(
     // For security reasons, only expose the file's basename in production.
     code += `\ncomponent.options.__file = ${JSON.stringify(filename)}`
   }
-
+  if (recyclable) { // fixed by xxxxxx app-plus recyclable
+    code += `\nrecyclableRender && (component.options["@render"] = recyclableRender)` // fixed by xxxxxx
+  }
   code += `\nexport default component.exports`
   // console.log(code)
   return code

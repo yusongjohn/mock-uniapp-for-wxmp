@@ -11,6 +11,7 @@
   "devDependencies": {
     "webpack": "4.46.0",
     "vue-loader": "15.8.3",
+    "vue-template-compiler": "2.6.11",
     "copy-webpack-plugin": "5.1.2",
     "wrap-loader": "^0.2.0"
   },
