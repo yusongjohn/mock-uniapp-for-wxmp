@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "pages/home/main"
+  ],
+  "subpackages": [
+    {
+      "root": "pages/sell",
+      "pages": [
+        "index"
+      ]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "Weixin",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json"
+}
