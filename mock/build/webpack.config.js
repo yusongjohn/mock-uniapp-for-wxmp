@@ -24,7 +24,9 @@ function getEntry(context) {
 }
 
 module.exports = function (context) {
-    return {
+    const config = {
+        mode: "development",
+        devtool: 'cheap-source-map',
         entry: getEntry(context),
         output: {
             chunkFilename: "[id].js",
@@ -37,6 +39,34 @@ module.exports = function (context) {
             noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
             rules: require('./loaders/index')(context)
         },
-        plugins: require('./plugins/index')(context)
+        plugins: require('./plugins/index')(context),
+        resolve: {
+            alias: {
+                "./@": context,
+                "@": context,
+                "uni-pages": `${context}/app.json`,
+                vuex: path.resolve(__dirname, "../runtime/vuex3/vuex.common.js"),
+                vue$: path.resolve(__dirname, "../runtime/mp-vue/mp.runtime.esm.js")
+            },
+            extensions: [".mjs", ".js", ".jsx", ".@dcloudio", ".json", ".wasm", ".nvue"],
+            modules: [
+                "node_modules"
+            ]
+        },
+        resolveLoader: {
+            alias: {
+                // "vue-loader": "/Users/songyu/songyu/only-weixin-mp-in-uniapp/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/index.js",
+            }
+        },
+        optimization: {
+            namedModules: false,
+            noEmitOnErrors: false,
+            runtimeChunk: {
+                name: 'common/runtime'
+            },
+            splitChunks: require('./split-chunks')
+        }
     }
+    return config
+
 }

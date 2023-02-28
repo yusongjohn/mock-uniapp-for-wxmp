@@ -27,14 +27,17 @@ function getMpRules(context) {
                 }
             ]
         },
-        // {
-        //     resourceQuery: /vue&type=template/,
-        //     use: [
-        //         {
-        //             loader: path.resolve(__dirname, 'template.js')
-        //         }
-        //     ]
-        // },
+        {
+            resourceQuery: /vue&type=template/,
+            use: [
+                {
+                    loader: path.resolve(__dirname, 'template.js')
+                },
+                // {
+                //  loader: path.resolve(__dirname, 'page-meta.js')
+                // }
+            ]
+        },
         // {
         //     resourceQuery: [
         //         /lang=wxs/,
@@ -61,7 +64,25 @@ const getCommonRules = function (context) {
             use: [
                 {
                     loader: "babel-loader",
-                    // options:
+                    options: {
+                        "presets": [
+                            [
+                                "@vue/app",
+                                {
+                                    "modules": false,
+                                    "useBuiltIns": "entry"
+                                }
+                            ]
+                        ],
+                        "plugins": [
+                            [
+                                "import",
+                                // {
+                                //     "libraryName": "@dcloudio/uni-ui"
+                                // }
+                            ]
+                        ]
+                    }
                 }
             ],
             exclude: /(node_modules)/,
@@ -69,11 +90,15 @@ const getCommonRules = function (context) {
     ]
 }
 
-const compiler = require('@dcloudio/uni-template-compiler')
 const vueOptions = {
     cacheDirectory: false,
     cacheIdentifier: false,
-    compiler
+    transformAssetUrls: false,
+    hotReload: false,
+    compiler: require('./uni-template-compiler'),
+    compilerOptions: {
+        preserveWhitespace: false
+    }
 }
 
 const vueLoaderRules = [

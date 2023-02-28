@@ -64,21 +64,21 @@ module.exports = function (source) {
           const frame = compiler.generateCodeFrame(source, start, end)
           return `  ${msg}\n\n${pad(frame)}`
         }).join(`\n\n`) +
-        '\n at ' + finalOptions.filename + ':0' // fixed by xxxxxx
+        '\n'
       )
     } else {
       loaderContext.emitError(
         `\n  Error compiling template:\n${pad(compiled.source)}\n` +
           compiled.errors.map(e => `  - ${e}`).join('\n') +
-          '\n at ' + finalOptions.filename + ':0' // fixed by xxxxxx
+          '\n'
       )
     }
   }
 
   const { code } = compiled
-  // fixed by xxxxxx recyclableRender, components
-  // finish with ESM exports 
-  return code + `\nexport { render, staticRenderFns, recyclableRender, components }`
+
+  // finish with ESM exports
+  return code + `\nexport { render, staticRenderFns }`
 }
 
 function pad (source) {

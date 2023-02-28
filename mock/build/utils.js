@@ -1,6 +1,18 @@
 const path = require('path')
 
+const isWin = /^win/.test(process.platform)
+
+const normalizePath = path => (isWin ? path.replace(/\\/g, '/') : path)
+
 module.exports = {
+    normalizePath,
+    removeExt(str, ext) {
+        if (ext) {
+            const reg = new RegExp(ext.replace(/\./, '\\.') + '$')
+            return normalizePath(str.replace(reg, ''))
+        }
+        return normalizePath(str.replace(/\.\w+$/g, ''))
+    },
     getAllPages: function (appJson) {
         const pages = appJson.pages || [];
         const subPackages = appJson.subpackages || appJson.subPackages || [];

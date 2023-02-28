@@ -4,9 +4,9 @@
   ],
   "subpackages": [
     {
-      "root": "pages/sell",
+      "root": "pages/sub",
       "pages": [
-        "index"
+        "sell/index"
       ]
     }
   ],
