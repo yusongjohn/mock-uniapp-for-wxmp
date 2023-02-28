@@ -255,8 +255,8 @@
 
   /*  */
 
-  var isUnaryTag = makeMap(
-    'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+  var isUnaryTag = makeMap(// fixed by xxxxxx add image
+    'image,area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr'
   );
 
@@ -522,7 +522,9 @@
           : options.shouldDecodeNewlines;
         attrs[i] = {
           name: args[1],
-          value: decodeAttr(value, shouldDecodeNewlines)
+          value: decodeAttr(value, shouldDecodeNewlines),
+          // fixed by xxxxxx 标记 Boolean Attribute
+          bool: args[3] === undefined && args[4] === undefined && args[5] === undefined
         };
         if (options.outputSourceRange) {
           attrs[i].start = args.start + args[0].match(/^\s*/).length;
@@ -597,6 +599,7 @@
   var splitRE$1 = /\r?\n/g;
   var replaceRE = /./g;
   var isSpecialTag = makeMap('script,style,template', true);
+  var isCustomBlock = makeMap('wxs,filter,sjs,renderjs', true);// fixed by xxxxxx
 
   /**
    * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
@@ -653,8 +656,8 @@
             cumulated[name] = value || true;
             return cumulated
           }, {})
-        };
-        if (isSpecialTag(tag)) {
+        };// fixed by xxxxxx
+        if (isSpecialTag(tag) && !isCustomBlock(String(currentBlock.attrs.lang || ''))) {
           checkAttrs(currentBlock, attrs);
           if (tag === 'style') {
             sfc.styles.push(currentBlock);
@@ -711,7 +714,8 @@
         return content.slice(0, block.start).replace(replaceRE, ' ')
       } else {
         var offset = content.slice(0, block.start).split(splitRE$1).length;
-        var padChar = block.type === 'script' && !block.lang
+        var lang = block.attrs && block.attrs.lang; // fixed by xxxxxx
+        var padChar = block.type === 'script' && !block.lang && !isCustomBlock(String(lang || ''))
           ? '//\n'
           : '\n';
         return Array(offset).join(padChar)
@@ -1034,7 +1038,13 @@
    * directives subscribing to it.
    */
   var Dep = function Dep () {
-    this.id = uid++;
+    // fixed by xxxxxx (nvue vuex)
+    /* eslint-disable no-undef */
+    if(typeof SharedObject !== 'undefined'){
+      this.id = SharedObject.uid++;
+    } else {
+      this.id = uid++;
+    }
     this.subs = [];
   };
 
@@ -1047,8 +1057,8 @@
   };
 
   Dep.prototype.depend = function depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.SharedObject.target) {
+      Dep.SharedObject.target.addDep(this);
     }
   };
 
@@ -1063,7 +1073,11 @@
   // The current target watcher being evaluated.
   // This is globally unique because only one watcher
   // can be evaluated at a time.
-  Dep.target = null;
+  // fixed by xxxxxx (nvue shared vuex)
+  /* eslint-disable no-undef */
+  Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+  Dep.SharedObject.target = null;
+  Dep.SharedObject.targetStack = [];
 
   /*  */
 
@@ -1182,7 +1196,9 @@
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
       if (hasProto) {
-        protoAugment(value, arrayMethods);
+        {
+          protoAugment(value, arrayMethods);
+        }
       } else {
         copyAugment(value, arrayMethods, arrayKeys);
       }
@@ -1294,7 +1310,7 @@
       configurable: true,
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
-        if (Dep.target) {
+        if (Dep.SharedObject.target) { // fixed by xxxxxx
           dep.depend();
           if (childOb) {
             childOb.dep.depend();
@@ -2915,6 +2931,7 @@
       shouldKeepComment: options.comments,
       outputSourceRange: options.outputSourceRange,
       start: function start (tag, attrs, unary, start$1, end) {
+
         // check namespace.
         // inherit parent ns if there is one
         var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -3681,6 +3698,10 @@
         return
       }
 
+      if(process.env.UNI_PLATFORM !== 'h5'){ // fixed by xxxxxx  非 h5 平台 type 不会是 checkbox,radio
+        return
+      }
+
       var typeBinding;
       if (map[':type'] || map['v-bind:type']) {
         typeBinding = getBindingAttr(el, 'type');
@@ -3744,7 +3765,38 @@
     preTransformNode: preTransformNode
   };
 
+  /*  */
+
+  function transformNode$2(el) {
+    var list = el.attrsList;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var name = list[i].name;
+      if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
+        var nameArr = name.split(':');
+        var wxsProp = nameArr[nameArr.length - 1];
+        var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
+        if (wxsPropBinding) {
+          (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
+        }
+      }
+    }
+  }
+
+  function genData$2(el) {
+    var data = '';
+    if (el.wxsPropBindings) {
+      data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
+    }
+    return data
+  }
+
+  var wxs = {
+    transformNode: transformNode$2,
+    genData: genData$2
+  };
+
   var modules = [
+    wxs,// fixed by xxxxxx
     klass,
     style,
     model
@@ -4326,7 +4378,7 @@
       } else {
         var data;
         if (!el.plain || (el.pre && state.maybeComponent(el))) {
-          data = genData$2(el, state);
+          data = genData$3(el, state);
         }
 
         var children = el.inlineTemplate ? null : genChildren(el, state, true);
@@ -4430,7 +4482,7 @@
     var alias = el.alias;
     var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
     var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
-
+    var iterator3 = el.iterator3 ? ("," + (el.iterator3)) : ''; // fixed by xxxxxx
     if (state.maybeComponent(el) &&
       el.tag !== 'slot' &&
       el.tag !== 'template' &&
@@ -4447,12 +4499,12 @@
 
     el.forProcessed = true; // avoid recursion
     return (altHelper || '_l') + "((" + exp + ")," +
-      "function(" + alias + iterator1 + iterator2 + "){" +
+      "function(" + alias + iterator1 + iterator2 + iterator3 + "){" + // fixed by xxxxxx
         "return " + ((altGen || genElement)(el, state)) +
       '})'
   }
 
-  function genData$2 (el, state) {
+  function genData$3 (el, state) {
     var data = '{';
 
     // directives first.
@@ -4785,7 +4837,7 @@
     state
   ) {
     var children = el.inlineTemplate ? null : genChildren(el, state, true);
-    return ("_c(" + componentName + "," + (genData$2(el, state)) + (children ? ("," + children) : '') + ")")
+    return ("_c(" + componentName + "," + (genData$3(el, state)) + (children ? ("," + children) : '') + ")")
   }
 
   function genProps (props) {
@@ -5551,7 +5603,7 @@
   }
 
   function genNormalElement (el, state, stringifyChildren) {
-    var data = el.plain ? undefined : genData$2(el, state);
+    var data = el.plain ? undefined : genData$3(el, state);
     var children = stringifyChildren
       ? ("[" + (genChildrenAsStringNode(el, state)) + "]")
       : genSSRChildren(el, state, true);
