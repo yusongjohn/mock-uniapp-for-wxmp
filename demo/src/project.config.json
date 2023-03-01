@@ -1,0 +1,11 @@
+{
+    "description": "项目配置文件。",
+    "setting": {
+        "urlCheck": false,
+        "es6": false
+    },
+    "compileType": "miniprogram",
+    "libVersion": "",
+    "appid": "wxdf2cbe4033a6ecfc",
+    "projectname": "mock uniapp"
+}

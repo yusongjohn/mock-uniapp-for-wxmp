@@ -1,0 +1,36 @@
+{
+  "pages": [
+    {
+      "path": "pages/home/main",
+      "style": {
+        "backgroundColor": "#f5f5f5",
+        "navigationBarTitleText": "您的国庆专属海报",
+        "disableScroll": true,
+        "usingComponents": {}
+      }
+    }
+  ],
+  "subpackages": [
+    {
+      "root": "pages/sub",
+      "pages": [
+        {
+          "path": "sell/index",
+          "style": {
+            "backgroundColor": "#f5f5f5",
+            "navigationBarTitleText": "您的国庆专属海报",
+            "disableScroll": true,
+            "usingComponents": {}
+          }
+        }
+      ]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "Weixin",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json"
+}
