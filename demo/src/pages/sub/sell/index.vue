@@ -5,9 +5,9 @@
 </template>
 <script>
 export default {
-  data() {
+  data () {
     return {
-      sellInfo: 'sell info'
+      sellInfo: 'sell info',
     };
   },
   methods: {},

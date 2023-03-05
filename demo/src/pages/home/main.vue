@@ -21,27 +21,27 @@
 </template>
 <script>
 export default {
-  data() {
+  data () {
     return {
-      content: "test content",
+      content: 'test content',
       showSpan: true,
-      searchText: "请输入内容",
-      items: ["a", "b", "c"],
+      searchText: '请输入内容',
+      items: ['a', 'b', 'c'],
     };
   },
   watch: {
-    searchText() {
-      console.log("searchText", this.searchText);
+    searchText () {
+      console.log('searchText', this.searchText);
       this.content = this.searchText;
     },
   },
   methods: {
-    clickHandler() {
+    clickHandler () {
       this.showSpan = !this.showSpan;
 
-      // uni.navigateTo({
-      //   url: "/pages/sub/sell/index",
-      // });
+      uni.navigateTo({
+        url: "/pages/sub/sell/index",
+      });
     },
   },
 };

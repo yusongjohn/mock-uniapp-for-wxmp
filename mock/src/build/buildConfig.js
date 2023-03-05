@@ -27,25 +27,14 @@ module.exports = function (context) {
             publicPath: "/"
         },
         module: {
-            noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
+            noParse: /^(vue|vuex)$/,
             rules: getRules(context)
         },
         plugins: getPlugins(context),
         resolve: {
             alias: {
-                "./@": context,
-                "@": context,
-                "uni-pages": `${context}/app.json`,
-                "vuex": path.resolve(__dirname, "../runtime/vuex3/vuex.common.js"),
                 "vue$": path.resolve(__dirname, "../runtime/mp-vue/mp.runtime.esm.js")
-            },
-            extensions: [".mjs", ".js", ".jsx", ".@dcloudio", ".json", ".wasm", ".nvue"],
-            modules: [
-                "node_modules"
-            ]
-        },
-        resolveLoader: {
-            alias: {}
+            }
         },
         optimization: {
             namedModules: false,

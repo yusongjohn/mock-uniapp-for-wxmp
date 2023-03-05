@@ -1,6 +1,8 @@
 const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const mpRuntime = path.resolve(__dirname, '../../runtime/uni-mp-weixin/index');
+
 function getMpRules(context) {
     return [
         {
@@ -9,10 +11,7 @@ function getMpRules(context) {
                 {
                     loader: "wrap-loader",
                     options: {
-                        before: [
-                            "import 'uni-pages';",
-                            "wx.__webpack_require_UNI_MP_PLUGIN__ = __webpack_require__;"
-                        ]
+                        before: [`import '${mpRuntime}'`]
                     }
                 },
                 {
@@ -39,7 +38,6 @@ function getMpRules(context) {
     ]
 }
 
-
 const getCommonRules = function (context) {
     return [
         {
@@ -57,6 +55,7 @@ const getCommonRules = function (context) {
                     options: {
                         "presets": [
                             [
+                                // https://cli.vuejs.org/zh/guide/browser-compatibility.html#usebuiltins-usage
                                 "@vue/app",
                                 {
                                     "modules": false,
@@ -72,20 +71,14 @@ const getCommonRules = function (context) {
 }
 
 const vueOptions = {
-    cacheDirectory: false,
-    cacheIdentifier: false,
-    transformAssetUrls: false,
-    hotReload: false,
     compiler: require('./uni-template-compiler'),
-    compilerOptions: {
-        preserveWhitespace: false
-    }
+    compilerOptions: {},
 }
 
 const vueLoaderRules = [
     {
         test: /\.vue$/,
-        use: [            
+        use: [
             {
                 loader: 'vue-loader',
                 options: vueOptions

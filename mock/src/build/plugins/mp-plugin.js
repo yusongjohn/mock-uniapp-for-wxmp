@@ -93,17 +93,11 @@ module.exports = class {
 
     apply(compiler) {
         compiler.hooks.emit.tapPromise('webpack-uni-mp-emit', compilation => {
-            return new Promise((resolve, reject) => {
-                // addSubPackagesRequire(compilation)
-                // addMPPluginRequire(compilation)
-                generateJson(compilation, this.context)
+            return new Promise((resolve, reject) => {                
+                generateJson(compilation, this.context)            
 
-                // app.js, app.wxss
                 generateApp(compilation).forEach(({ file, source }) => emitFile(compilation, file, source))
-
-                // generateComponent(compilation, compiler.options.output.jsonpFunction)
-
-                resolve()
+                resolve();
             })
         })
     }
