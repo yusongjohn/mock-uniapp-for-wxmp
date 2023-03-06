@@ -1,5 +1,7 @@
 # test
-cd mock/src && node ./test.js
+- cd mock/src 
+- yarn 
+- node ./test.js
 
 # remark
 - 主要是研究uniapp如何支持vue2.0 转 小程序，当前实现的过程并不会兼容uniapp写法的小程序

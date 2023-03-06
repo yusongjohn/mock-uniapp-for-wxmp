@@ -3,10 +3,11 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const mpRuntime = path.resolve(__dirname, '../../runtime/uni-mp-weixin/index');
 
-function getMpRules(context) {
+
+function getRules(context) {
     return [
         {
-            test: `${context}/main.js`,
+            test: `${context}/main.js$`,
             use: [
                 {
                     loader: "wrap-loader",
@@ -34,12 +35,7 @@ function getMpRules(context) {
                     loader: path.resolve(__dirname, 'mp/template.js')
                 }
             ]
-        }
-    ]
-}
-
-const getCommonRules = function (context) {
-    return [
+        },
         {
             test: /\.css$/i,
             use: [MiniCssExtractPlugin.loader, "css-loader"],
@@ -66,28 +62,23 @@ const getCommonRules = function (context) {
                     }
                 }
             ]
+        },
+        {
+            test: /\.vue$/,
+            use: [
+                {
+                    loader: 'vue-loader',
+                    options: {
+                        compiler: require('./uni-template-compiler'),
+                        compilerOptions: {},
+                    }
+                },
+            ]
+
         }
     ]
 }
 
-const vueOptions = {
-    compiler: require('./uni-template-compiler'),
-    compilerOptions: {},
-}
-
-const vueLoaderRules = [
-    {
-        test: /\.vue$/,
-        use: [
-            {
-                loader: 'vue-loader',
-                options: vueOptions
-            },
-        ]
-
-    }
-]
-
 module.exports = function (context) {
-    return [...vueLoaderRules, ...getCommonRules(context), ...getMpRules(context)]
+    return getRules(context);
 }

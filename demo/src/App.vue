@@ -20,3 +20,9 @@ export default {
   },
 };
 </script>
+
+<style>
+view {
+  font-size: 60rpx;
+}
+</style>

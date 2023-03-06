@@ -11,7 +11,6 @@ module.exports = class {
                 if (!chunk) return;
 
                 if (!chunk.entryModule) { // 页面vue是entry，因此自然有，组件vue不是，刚好在这加
-                    console.log(module.userRequest)
                     // 这样做的目的是可以自动执行该模块
                     // 见 lib/web/JsonpChunkTemplatePlugin.js -> getEntryInfo
                     chunk.entryModule = module;

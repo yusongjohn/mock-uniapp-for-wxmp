@@ -14,4 +14,4 @@ const app = new Vue({
 // TODO 
 // createApp应该在loader中做转换即 app.$mount -> createApp(app).$mount，
 // 暂不处理
-wx.createApp(app).$mount();
+createApp(app).$mount();

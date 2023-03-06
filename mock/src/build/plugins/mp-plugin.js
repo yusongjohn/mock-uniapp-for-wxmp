@@ -14,7 +14,7 @@ function emitFile(compilation, filePath, source) {
     }
 }
 
-const ext = `wxss`;
+const ext = `.wxss`;
 function generateApp(compilation) {
     const appJs = {
         file: `app.js`,

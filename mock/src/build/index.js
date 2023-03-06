@@ -4,7 +4,7 @@ function build(context) {
     process.env.context = context;
 
     const config = require('./buildConfig')(context);
-    
+
     webpack(config, function (err, result) {
         err && console.error(err)
         

@@ -25,6 +25,9 @@ module.exports = function (context) {
         new CopyPlugin(getCopyPattern(context)),
         new MiniCssExtractPlugin({filename: "[name].wxss"}),
         new webpack.ProvidePlugin({
+            createApp:       [mpRuntime, 'createApp'],
+            createComponent: [mpRuntime, 'createComponent'],
+            createPage:      [mpRuntime, 'createPage'],
             uni:             [mpRuntime, 'default']
         }),
         new MpPlugin(context),
