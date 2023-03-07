@@ -1,10 +1,15 @@
 const path = require('path')
-const {appJsonFile} = require("./constant");
+const { appJsonFile } = require("./constant");
 const fsExtra = require("fs-extra");
 const isWin = /^win/.test(process.platform)
 const normalizePath = path => (isWin ? path.replace(/\\/g, '/') : path)
 
-module.exports = {
+const hyphenateRE = /\B([A-Z])/g
+
+module.exports = {    
+    hyphenate: (str) => {
+        return str.replace(hyphenateRE, '-$1').toLowerCase()
+    },
     normalizePath,
     removeExt(str, ext) {
         if (ext) {
@@ -29,7 +34,7 @@ module.exports = {
         allPages.push(...pages.map(page => page.path))
 
         function handler(subPackage) {
-            const {root} = subPackage;
+            const { root } = subPackage;
             const pages = subPackage.pages || [];
             allPages.push(...pages.map(page => `${root}/${page.path}`))
         }
@@ -52,6 +57,6 @@ module.exports = {
             } catch (e) {
             }
         }
-        return {referencePath, localPath};
+        return { referencePath, localPath };
     }
 }

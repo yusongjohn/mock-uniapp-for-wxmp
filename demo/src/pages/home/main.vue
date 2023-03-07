@@ -2,7 +2,9 @@
   <div id="app" class="container">
     <div>static node</div>
 
-    <todo-item :content="content"></todo-item>
+    <global-compo :content="content"></global-compo>
+    
+    <scoped-compo :content="content"></scoped-compo>
 
     <span @click="clickHandler" :class="{ active: showSpan }">
       可以点击啊：<span v-if="showSpan">show span</span>
@@ -20,23 +22,28 @@
   </div>
 </template>
 <script>
+import scopedCompo from "../../components/scoped-compo.vue";
+
 export default {
-  data () {
+  data() {
     return {
-      content: 'test content',
+      content: "test content",
       showSpan: true,
-      searchText: '请输入内容',
-      items: ['a', 'b', 'c'],
+      searchText: "请输入内容",
+      items: ["a", "b", "c"],
     };
   },
+  components: {
+    "scoped-compo": scopedCompo,
+  },
   watch: {
-    searchText () {
-      console.log('searchText', this.searchText);
+    searchText() {
+      console.log("searchText", this.searchText);
       this.content = this.searchText;
     },
   },
   methods: {
-    clickHandler () {
+    clickHandler() {
       this.showSpan = !this.showSpan;
 
       uni.navigateTo({

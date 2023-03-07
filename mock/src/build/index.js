@@ -5,7 +5,7 @@ function build(context) {
 
     const config = require('./buildConfig')(context);
 
-    webpack(config, function (err, result) {
+    webpack(config, function (err, result) { 
         err && console.error(err)
         
         result && result.compilation.errors.length && console.error(result.compilation.errors)

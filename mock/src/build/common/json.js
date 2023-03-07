@@ -10,7 +10,17 @@ class JsonHandler {
 
     updatePageJson(filePath, extend = {}) {
         const pageJson = this.getPageJson(filePath);
+        let mergedUsingComponents
+        
+        if (extend.usingComponents) {
+            const beforeUsingComponents = pageJson.usingComponents || {};
+            mergedUsingComponents = Object.assign({}, beforeUsingComponents, extend.usingComponents || {})
+        }
         Object.assign(pageJson, extend);
+
+        if (mergedUsingComponents) {
+            pageJson.usingComponents = mergedUsingComponents;
+        }
     }
 
     updateUsingComponents(filePath, components) {

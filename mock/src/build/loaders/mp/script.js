@@ -1,25 +1,21 @@
 const path = require('path');
-const { removeExt, getAllPages } = require('../../common/utils');
-const jsonHandler = require('../../common/json');
+const { removeExt } = require('../../common/utils');
+const processComponents = require('./babel/index')
+
+// 暂时只是解析 export default {components:{}} 写法
+const traverse = require('./babel/scoped-component-traverse');
 
 module.exports = async function (content) {
-    
+
     this.cacheable && this.cacheable()
 
     const context = process.env.context;
-    const resourcePath = removeExt(path.relative(context, this.resourcePath))
+    resourcePath = removeExt(path.relative(context, this.resourcePath))
 
-    // TODO 解析出每个vue文件中声明的组件啊
-    const dependComponents = {};
+    if (resourcePath === 'App') resourcePath = 'app'; // App.vue中的components变成全局组件了？
 
-    // 判断是不是组件（App.vue、页面.vue、组件.vue三种情况）
-    const allPages = getAllPages()
-    if (!allPages.includes(resourcePath) && resourcePath !== 'App') {
-        jsonHandler.updatePageJson(resourcePath, { component: true });
-    }
-    const filePath = resourcePath === 'App' ? 'app' : resourcePath
-    jsonHandler.updateUsingComponents(filePath, dependComponents);
-    
-    return content;
+    const callback = this.async();
+    const pasePromise = processComponents(this, traverse, { content, resourcePath });
+    pasePromise.then(() => callback(null, content)).catch(err => callback(err, content))
 }
 

@@ -1,0 +1,12 @@
+{
+    "presets": [
+        [
+            // https://cli.vuejs.org/zh/guide/browser-compatibility.html#usebuiltins-usage
+            "@vue/app",
+            {
+                "modules": false,
+                "useBuiltIns": "entry"
+            }
+        ]
+    ]
+}

@@ -32,7 +32,7 @@ module.exports = {
         options.preserveWhitespace = false
         options.modules.push(compilerModule)
 
-        // optimize 针对虚拟DOM的，静态节点优化
+        // optimize 针对虚拟DOM的，静态节点优化，显然这里不需要
         const res = compile(source, Object.assign(options, { optimize: false }));
 
         options.mp.platform = require('./mp')();
@@ -68,13 +68,6 @@ module.exports = {
         // res.generic // resolve scoped slots
         // res.componentGenerics // define scoped slots
 
-        /**
-         * TODO
-         * 方案0.最佳方案是在 loader 中直接 emitFile，但目前 vue template-loader 不好介入,自定义的 compiler 结果又无法顺利返回给 loader
-         * 方案1.通过 loader 传递 emitFile 来提交生成 wxml,需要一个 template loader 来给自定义 compier 增加 emitFile
-         * 方案2.缓存 wxml 内容，由 plugin 生成 assets 来提交生成 wxml
-         * ...暂时使用方案1
-         */
         if (options.emitFile) {
             // updateSpecialMethods
             options.emitFile(options.resourcePath, template)

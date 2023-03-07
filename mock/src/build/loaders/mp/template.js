@@ -1,5 +1,5 @@
 // const loaderUtils = require('loader-utils')
-const { removeExt} = require("../../common/utils");
+const { removeExt } = require("../../common/utils");
 const path = require('path')
 
 module.exports = function (content) {
@@ -10,12 +10,6 @@ module.exports = function (content) {
     const vueLoaderOptions = this.loaders.find(loader => loader.ident === 'vue-loader-options')
 
     Object.assign(vueLoaderOptions.options.compilerOptions, {
-        mp: {
-            platform: "mp-weixin",
-            scopedSlotsCompiler: "auto",
-        },
-        filterModules: {},
-        filterTagName: 'wxs',
         resourcePath,
         emitFile: this.emitFile
     })

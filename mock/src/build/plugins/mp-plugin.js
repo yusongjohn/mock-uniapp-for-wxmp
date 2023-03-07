@@ -22,7 +22,8 @@ function generateApp(compilation) {
     }
 
     let importMainCss = ''
-    if (compilation.assets[`common/main.${ext}`]) { // 是否存在 main.css
+
+    if (compilation.assets[`common/main${ext}`]) { // 是否存在 main.css
         importMainCss = `@import './common/main${ext}';`
     }
 
@@ -56,7 +57,6 @@ function generateAppJson(compilationm, context) {
         const pages = subPackage.pages || [];
         subPackage.pages = pages.map(page => {
             const pagePath = `${root}/${page.path}`
-            
             // 页面json
             jsonHandler.updatePageJson(pagePath, page.style || {})
             return `${page.path}`
@@ -93,8 +93,8 @@ module.exports = class {
 
     apply(compiler) {
         compiler.hooks.emit.tapPromise('webpack-uni-mp-emit', compilation => {
-            return new Promise((resolve, reject) => {                
-                generateJson(compilation, this.context)            
+            return new Promise((resolve, reject) => {
+                generateJson(compilation, this.context)
 
                 generateApp(compilation).forEach(({ file, source }) => emitFile(compilation, file, source))
                 resolve();

@@ -1,7 +1,7 @@
 <template>
-  <div class="todo-item">  
-    自定义组件名称: {{ name }} <br />
-    自定义组件属性值: {{ content }}
+  <div class="global-compo">  
+    全局组件: {{ name }} <br />
+    属性值: {{ content }}
   </div>
 </template>
 
@@ -10,14 +10,14 @@ export default {
   props: ["content"],
   data() {
     return {
-      name: "todo-item",
+      name: "global-compo",
     };
   },
 };
 </script>
 
 <style>
-.todo-item {
+.global-compo {
   background: red;
 }
 </style>
